@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Betty Estate · Financial Dashboard 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+/* ─────────────────────────────────────────────
+   DESIGN TOKENS — estate palette
+───────────────────────────────────────────── */
+:root {
+  --orange:       #f46524;
+  --orange-light: #fff2ed;
+  --orange-mid:   rgba(244,101,36,0.12);
+  --orange-dim:   rgba(244,101,36,0.35);
+  --bg:           #faf9f7;
+  --surface:      #ffffff;
+  --surface-2:    #f5f3ef;
+  --border:       #e8e3db;
+  --border-dark:  #d4cec4;
+  --navy:         #1a2b4a;
+  --navy-light:   rgba(26,43,74,0.07);
+  --text:         #1a1a1a;
+  --text-mid:     #555048;
+  --text-muted:   #9a9288;
+  --text-dim:     #c5bfb5;
+  /* financial indicator colours — industry standard */
+  --income:       #1a6b3c;
+  --income-bg:    #edf7f2;
+  --expense:      #b93020;
+  --expense-bg:   #fdf0ee;
+  --surplus:      #1a6b3c;
+  --deficit:      #b93020;
+  --budget:       #7a5c1e;
+  --budget-bg:    #fdf8ee;
+  --neutral:      #1a2b4a;
+  --neutral-bg:   #eef1f7;
+
+  --radius:       10px;
+  --radius-sm:    6px;
+  --shadow:       0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13.5px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ─── HEADER ─── */
+.header {
+  background: var(--navy);
+  padding: 0 36px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.header-logo {
+  width: 32px; height: 32px;
+  border-radius: 6px;
+  background: var(--orange);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Serif Display', serif;
+  font-size: 15px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.header-brand h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 17px;
+  font-weight: 400;
+  color: #fff;
+  letter-spacing: 0.01em;
+}
+
+.header-brand .sub {
+  font-size: 10px;
+  color: rgba(255,255,255,0.45);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.balance-pill {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 100px;
+  padding: 5px 14px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.85);
+}
+
+.balance-pill strong { color: #fff; }
+
+.report-date {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.05em;
+}
+
+/* ─── FILTER BAR ─── */
+.filter-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 36px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.filter-bar::-webkit-scrollbar { display: none; }
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 20px;
+  margin-right: 20px;
+  border-right: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.filter-group:last-child {
+  border-right: none;
+  padding-right: 0;
+  margin-right: 0;
+}
+
+.filter-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  font-weight: 600;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.pill {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 4px 12px;
+  border-radius: 100px;
+  font-size: 11.5px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.pill:hover {
+  border-color: var(--orange-dim);
+  color: var(--orange);
+  background: var(--orange-light);
+}
+
+.pill.active {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: #fff;
+}
+
+/* ─── MAIN ─── */
+.main {
+  padding: 24px 36px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ─── KPI ROW ─── */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.kpi {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px 16px;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+
+.kpi:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08), 0 8px 20px rgba(0,0,0,0.06); }
+
+.kpi::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+
+.kpi-income::before  { background: var(--income); }
+.kpi-expense::before { background: var(--expense); }
+.kpi-net::before     { background: var(--orange); }
+.kpi-budget::before  { background: var(--budget); }
+
+.kpi-label {
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.kpi-income  .kpi-label { color: var(--income); }
+.kpi-expense .kpi-label { color: var(--expense); }
+.kpi-net     .kpi-label { color: var(--orange); }
+.kpi-budget  .kpi-label { color: var(--budget); }
+
+.kpi-value {
+  font-family: 'DM Serif Display', serif;
+  font-size: 26px;
+  line-height: 1;
+  margin-bottom: 6px;
+  font-weight: 400;
+}
+
+.kpi-income  .kpi-value { color: var(--income); }
+.kpi-expense .kpi-value { color: var(--expense); }
+.kpi-net     .kpi-value { color: var(--navy); }
+.kpi-budget  .kpi-value { color: var(--navy); }
+
+.kpi-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ─── CHARTS ROW ─── */
+.charts-row {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 14px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 14px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-title {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  font-weight: 600;
+  color: var(--text-mid);
+}
+
+.card-body {
+  padding: 18px 20px;
+}
+
+.chart-wrap {
+  position: relative;
+  height: 210px;
+}
+
+/* Donut centre label */
+.donut-wrap {
+  position: relative;
+  height: 210px;
+}
+
+.donut-centre {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+  line-height: 1.25;
+  width: 95px;
+}
+
+.donut-centre-amount {
+  font-family: 'DM Serif Display', serif;
+  font-size: 15px;
+  color: var(--navy);
+  display: block;
+  white-space: nowrap;
+}
+
+.donut-centre-label {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  display: block;
+  max-width: 100px;
+  margin: 0 auto;
+  overflow: hidden;
+  white-space: normal;
+  line-height: 1.2;
+}
+
+/* ─── BOTTOM ROW ─── */
+.bottom-row {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 14px;
+}
+
+/* ─── TABLE ─── */
+.table-scroll {
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.table-scroll::-webkit-scrollbar { width: 4px; }
+.table-scroll::-webkit-scrollbar-track { background: transparent; }
+.table-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+table { width: 100%; border-collapse: collapse; }
+
+thead th {
+  padding: 9px 14px;
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  text-align: left;
+}
+
+thead th.right { text-align: right; }
+
+tbody tr {
+  border-bottom: 1px solid rgba(0,0,0,0.035);
+  transition: background 0.12s;
+}
+
+tbody tr:hover { background: var(--surface-2); }
+
+tbody td {
+  padding: 9px 14px;
+  font-size: 12.5px;
+  vertical-align: middle;
+}
+
+.td-month {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.td-amount {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  text-align: right;
+  color: var(--expense);
+}
+
+.td-cat {
+  max-width: 160px;
+}
+
+.cat-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10.5px;
+  font-weight: 500;
+  background: var(--navy-light);
+  color: var(--navy);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+.td-desc {
+  font-size: 11.5px;
+  color: var(--text-mid);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tx-count {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ─── VARIANCE ─── */
+.variance-list { padding: 10px 0; }
+
+.var-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 20px;
+  border-bottom: 1px solid rgba(0,0,0,0.03);
+}
+
+.var-item:last-child { border-bottom: none; }
+.var-item:hover { background: var(--surface-2); }
+
+.var-month {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  width: 36px;
+  flex-shrink: 0;
+}
+
+.var-track {
+  flex: 1;
+  height: 6px;
+  background: var(--surface-2);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.var-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.var-amount {
+  font-size: 11.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  width: 105px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.var-label {
+  font-size: 10px;
+  width: 70px;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+/* ─── EMPTY ─── */
+.empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-dim);
+  font-size: 12.5px;
+}
+
+/* ─── FOOTER ─── */
+.footer {
+  padding: 12px 36px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-note {
+  font-size: 10.5px;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+.footer-brand {
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     DATA BLOCK — update this each month
+     Copy values from DASHBOARD_DATA sheet
+     in the Excel workbook (rows 6-10, B:M for monthly; rows 14-22, B:M for categories)
+════════════════════════════════════════ -->
+<script>
+// ─────────────────────────────────────────
+// ✏️  UPDATE THIS BLOCK EACH NEW MONTH
+//     Values come from DASHBOARD_DATA sheet
+// ─────────────────────────────────────────
+
+const CONFIG = {
+  estateName:    'Betty Estate',
+  year:          2026,
+  asOf:          'June 2026',
+  startBalance:  223828.66,
+  endBalance:    582542.33,  // update each month
+  expenseBudget: 283333,     // monthly budget
+  incomeBudget:  3400000,    // annual service charge target
+};
+
+// Months active so far — add the next month when it closes
+const ACTIVE_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun'];
+const ALL_MONTHS    = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+// Monthly figures — extend each month (0 = not yet closed)
+const MONTHLY = {
+  //             Jan        Feb        Mar        Apr        May        Jun  Jul  Aug  Sep  Oct  Nov  Dec
+  income:     [670000,   300000,   180000,   100000,   420000,        520000,   0,   0,   0,   0,   0,   0],
+  expenses:   [344565,   270370,   286341,   328668,   484260,   117082,   0,   0,   0,   0,   0,   0],
+};
+
+// Category breakdown — extend when new months close
+// Keys must exactly match category names used in the monthly sheets
+const CATEGORIES = {
+  'Security (Salaries)':     [160000, 160000, 180000, 160000, 160000, 0, 0, 0, 0, 0, 0, 0],
+  'Waste Collection':        [ 40000,  40000,  80000,  40000,  40000, 10000, 0, 0, 0, 0, 0, 0],
+  'Borehole & Water':        [ 12000,   5000,      0,  67900, 232100, 62500, 0, 0, 0, 0, 0, 0],
+  'Electricity (AEDC)':      [ 12215,  30215,  20215,  30215,  15108, 20215, 0, 0, 0, 0, 0, 0],
+  'Generator & Fuel':        [     0,      0,      0,  16000,      0, 6200, 0, 0, 0, 0, 0, 0],
+  'Fumigation & Landscaping':[     0,      0,      0,      0,  35500, 0, 0, 0, 0, 0, 0, 0],
+  'Civil Works':             [ 94000,  28000,      0,      0,      0, 0, 0, 0, 0, 0, 0, 0],
+  'General Works':           [ 25200,   6000,   5000,  13000,      0, 17400, 0, 0, 0, 0, 0, 0],
+  'Bank Charges':            [  1150,   1155,   1126,   1553,   1552, 767, 0, 0, 0, 0, 0, 0],
+};
+
+// Full transaction log — add new transactions each month
+const TRANSACTIONS = [
+  // ── JANUARY ──
+  {month:'Jan',amount:25200,  desc:'Refund for 2025 Expenses',             category:'General Works'},
+  {month:'Jan',amount:40000,  desc:'Waste collection — December 2025',     category:'Waste Collection'},
+  {month:'Jan',amount:7000,   desc:'Borehole metre cable. Blk B',          category:'Borehole & Water'},
+  {month:'Jan',amount:2107.5,   desc:'New metre activation (AEDC)',        category:'Electricity (AEDC)'},
+  {month:'Jan',amount:5000, desc:'Fuel for Borehole Blk B',                category:'Borehole & Water'},
+  {month:'Jan',amount:10107.5,  desc:'Power unit (AEDC)',                     category:'Electricity (AEDC)'},
+  {month:'Jan',amount:30000,  desc:'Wood, shovel, touch lights, iron packer',category:'Civil Works'},
+  {month:'Jan',amount:5000,   desc:'Transport from tipper garage + welding',category:'Civil Works'},
+  {month:'Jan',amount:36000,  desc:'3 bags cement for culvert at gate',     category:'Civil Works'},
+  {month:'Jan',amount:3000,   desc:'PE socket for pipe water',              category:'Civil Works'},
+  {month:'Jan',amount:20000,  desc:'Sand, gravel and labour',               category:'Civil Works'},
+  {month:'Jan',amount:180000, desc:'Salaries (40k × 4 + 20k bonus)',        category:'Security (Salaries)'},
+  {month:'Jan',amount:1150,   desc:'Bank charges + stamp duty + SMS',       category:'Bank Charges'},
+  // ── FEBRUARY ──
+  {month:'Feb',amount:40000,  desc:'Waste collection — January 2026',       category:'Waste Collection'},
+  {month:'Feb',amount:5000,   desc:'Borehole power repair Blk B (refund)',  category:'Borehole & Water'},
+  {month:'Feb',amount:20215,  desc:'Power unit (AEDC) — Blk A',             category:'Electricity (AEDC)'},
+  {month:'Feb',amount:10000,  desc:'Power unit (AEDC) — Blk B',             category:'Electricity (AEDC)'},
+  {month:'Feb',amount:5000,   desc:'Part payment — culvert at gate',        category:'Civil Works'},
+  {month:'Feb',amount:23000,  desc:'Balance — culvert at gate',             category:'Civil Works'},
+  {month:'Feb',amount:6000,   desc:'Cleaning sewage. Blk B gate side',      category:'General Works'},
+  {month:'Feb',amount:160000, desc:'Salaries (40k × 4)',                    category:'Security (Salaries)'},
+  {month:'Feb',amount:1155,   desc:'Bank charges + stamp duty + SMS',       category:'Bank Charges'},
+  // ── MARCH ──
+  {month:'Mar',amount:40000,  desc:'Waste collection — February 2026',      category:'Waste Collection'},
+  {month:'Mar',amount:40000,  desc:'Waste collection — March 2026',         category:'Waste Collection'},
+  {month:'Mar',amount:10215,  desc:'Power unit (AEDC) × 2',                 category:'Electricity (AEDC)'},
+  {month:'Mar',amount:10000,  desc:'Power unit (AEDC)',                     category:'Electricity (AEDC)'},
+  {month:'Mar',amount:5000,   desc:'Block work in Blk B7 (bee obstruction)',category:'General Works'},
+  {month:'Mar',amount:160000, desc:'Salaries with Sallah bonus',            category:'Security (Salaries)'},
+  {month:'Mar',amount:1126,   desc:'Bank charges + stamp duty + SMS',       category:'Bank Charges'},
+  // ── APRIL ──
+  {month:'Apr',amount:5500,   desc:'Water control valves and nipples',      category:'Borehole & Water'},
+  {month:'Apr',amount:6400,   desc:'Maintenance: water linkages A & B',     category:'Borehole & Water'},
+  {month:'Apr',amount:15000,  desc:'Labour — plumbing work (Blk B)',        category:'Borehole & Water'},
+  {month:'Apr',amount:20000,  desc:'High polymer rubber — leakage repairs', category:'Borehole & Water'},
+  {month:'Apr',amount:21000,  desc:'Fuel — generator to pump water',        category:'Generator & Fuel'},
+  {month:'Apr',amount:16000,  desc:'Servicing of generator',                category:'Generator & Fuel'},
+  {month:'Apr',amount:13000,  desc:'Football and badminton for children',   category:'General Works'},
+  {month:'Apr',amount:10000,  desc:'Power unit (AEDC)',                     category:'Electricity (AEDC)'},
+  {month:'Apr',amount:20215,  desc:'Power unit (AEDC) × 2',                 category:'Electricity (AEDC)'},
+  {month:'Apr',amount:160000, desc:'Salaries (40k × 4)',                    category:'Security (Salaries)'},
+  {month:'Apr',amount:40000,  desc:'Waste collection — April 2026',         category:'Waste Collection'},
+  {month:'Apr',amount:1553,   desc:'Bank charges + stamp duty + SMS',       category:'Bank Charges'},
+  // ── MAY ──
+  {month:'May',amount:28500,  desc:'Chemical for grass fumigation',         category:'Fumigation & Landscaping'},
+  {month:'May',amount:7000,   desc:'Fumigation labour + 2 brooms',         category:'Fumigation & Landscaping'},
+  {month:'May',amount:15000,  desc:'Fuel for pumping water',                category:'Borehole & Water'},
+  {month:'May',amount:30000,  desc:'Fuel for pumping water',                category:'Borehole & Water'},
+  {month:'May',amount:30000,  desc:'Fuel for pumping water',                category:'Borehole & Water'},
+  {month:'May',amount:7000,   desc:'Borehole power switch socket (Blk A)', category:'Borehole & Water'},
+  {month:'May',amount:3000,   desc:'Borehole electrical work (Blk A)',      category:'Borehole & Water'},
+  {month:'May',amount:15108,  desc:'Power unit (AEDC)',                     category:'Electricity (AEDC)'},
+  {month:'May',amount:1500,   desc:'Transportation to tipper garage',       category:'Borehole & Water'},
+  {month:'May',amount:16000,  desc:'3 timber for overhead tank',            category:'Borehole & Water'},
+  {month:'May',amount:5000,   desc:'Timber + cutting — overhead tank',      category:'Borehole & Water'},
+  {month:'May',amount:500,    desc:'1 timber for overhead tank',            category:'Borehole & Water'},
+  {month:'May',amount:6000,   desc:'Transportation of timber',              category:'Borehole & Water'},
+  {month:'May',amount:8500,   desc:'25 yards rope to lower tank',           category:'Borehole & Water'},
+  {month:'May',amount:7000,   desc:'Plumbing work — part payment',          category:'Borehole & Water'},
+  {month:'May',amount:17600,  desc:'Plumbing materials',                    category:'Borehole & Water'},
+  {month:'May',amount:40000,  desc:'Welding + key lock',                    category:'Borehole & Water'},
+  {month:'May',amount:45000,  desc:'Welding repair — 2 tanks',              category:'Borehole & Water'},
+  {month:'May',amount:160000, desc:'Salaries (40k × 4)',                    category:'Security (Salaries)'},
+  {month:'May',amount:40000,  desc:'Waste collection — May 2026',           category:'Waste Collection'},
+  {month:'May',amount:1552,   desc:'Bank charges + stamp duty + SMS',       category:'Bank Charges'},
+// ── JUNE ──
+  {month:'Jun',amount:13000,    desc:'Balance: taking the tank up/down',       category:'Borehole & Water'},
+  {month:'Jun',amount:9400,     desc:'Gravel stone for ground work',           category:'Borehole & Water'},
+  {month:'Jun',amount:5200,     desc:'Plumbing materials',                     category:'Borehole & Water'},
+  {month:'Jun',amount:23500,    desc:'2 bags of cement for Blk A & B',         category:'Borehole & Water'},
+  {month:'Jun',amount:4400,     desc:'Plumbing work material',                 category:'Borehole & Water'},
+  {month:'Jun',amount:7000,     desc:'Labour for Blk A & B',                   category:'Borehole & Water'},
+  {month:'Jun',amount:15400,    desc:'AKT bulb for street lights (7pcs)',      category:'General Works'},
+  {month:'Jun',amount:6200,     desc:'Oil and plug for generator service',     category:'Generator & Fuel'},
+  {month:'Jun',amount:10107.5,  desc:'Power unit (AEDC) — Blk A',              category:'Electricity (AEDC)'},
+  {month:'Jun',amount:10107.5,  desc:'Power unit (AEDC) — Blk B',              category:'Electricity (AEDC)'},
+  {month:'Jun',amount:2000,     desc:'Ladder for street light installation',   category:'General Works'},
+  {month:'Jun',amount:10000,    desc:'Waste collection for June 2026',         category:'Waste Collection'},
+  {month:'Jun',amount:767,      desc:'Bank charges + stamp duty + SMS',        category:'Bank Charges'},
+];
+
+// ─────────────────────────────────────────
+// END OF UPDATE BLOCK
+// ─────────────────────────────────────────
+
+
+// ── DERIVED STATE ──────────────────────
+let activeMonth    = 'all';
+let activeQuarter  = null;
+let activeCategory = 'all';
+let barChart = null, donutChart = null;
+
+function getMonthIndex(abbr) { return ALL_MONTHS.indexOf(abbr); }
+
+function getActiveMonths() {
+  if (activeMonth !== 'all') return [activeMonth];
+  if (activeQuarter === 'Q1') return ['Jan','Feb','Mar'];
+  if (activeQuarter === 'Q2') return ['Apr','May','Jun'];
+  if (activeQuarter === 'Q3') return ['Jul','Aug','Sep'];
+  if (activeQuarter === 'Q4') return ['Oct','Nov','Dec'];
+  return ACTIVE_MONTHS;
+}
+
+function filteredTx() {
+  const months = getActiveMonths();
+  return TRANSACTIONS.filter(t => {
+    if (!months.includes(t.month)) return false;
+    if (activeCategory !== 'all' && t.category !== activeCategory) return false;
+    return true;
+  });
+}
+
+function fmt(n) {
+  if (n === null || n === undefined) return '—';
+  return '₦' + Math.round(Math.abs(n)).toLocaleString('en-NG');
+}
+
+// ── FILTER LOGIC ──────────────────────
+function setFilter(type, value) {
+  if (type === 'month') {
+    activeMonth = value;
+    activeQuarter = null;
+  } else if (type === 'quarter') {
+    activeQuarter = activeQuarter === value ? null : value;
+    activeMonth = 'all';
+  } else if (type === 'category') {
+    activeCategory = value;
+  }
+  syncPills();
+  render();
+}
+
+function syncPills() {
+  // period pills
+  document.querySelectorAll('[data-type="month"]').forEach(b => {
+    b.classList.toggle('active', b.dataset.value === activeMonth && !activeQuarter);
+  });
+  document.querySelectorAll('[data-type="quarter"]').forEach(b => {
+    b.classList.toggle('active', b.dataset.value === activeQuarter);
+  });
+  document.querySelectorAll('[data-type="category"]').forEach(b => {
+    b.classList.toggle('active', b.dataset.value === activeCategory);
+  });
+}
+
+// ── RENDER ────────────────────────────
+function render() {
+  const months = getActiveMonths();
+  const txs = filteredTx();
+  const midxs = months.map(getMonthIndex);
+
+  const totalIncome   = midxs.reduce((s,i) => s + (MONTHLY.income[i]   || 0), 0);
+  const totalExpenses = midxs.reduce((s,i) => s + (MONTHLY.expenses[i] || 0), 0);
+  const net           = totalIncome - totalExpenses;
+  const totalBudget   = months.length * CONFIG.expenseBudget;
+
+  // KPIs
+  document.getElementById('kpi-income').textContent  = fmt(totalIncome);
+  document.getElementById('kpi-income-sub').textContent = `${months.length} month${months.length>1?'s':''} · Service charges`;
+
+  document.getElementById('kpi-expenses').textContent = fmt(totalExpenses);
+  const pct = totalBudget > 0 ? ((totalExpenses / totalBudget) * 100).toFixed(0) : 0;
+  document.getElementById('kpi-expenses-sub').textContent = `${pct}% of ₦${Math.round(totalBudget/1000)}k budget`;
+
+  const netEl  = document.getElementById('kpi-net');
+  const netSub = document.getElementById('kpi-net-sub');
+  netEl.textContent = (net >= 0 ? '+' : '-') + fmt(Math.abs(net));
+  netEl.style.color = net >= 0 ? 'var(--surplus)' : 'var(--deficit)';
+  netSub.textContent = net >= 0 ? 'Surplus position' : 'Deficit position';
+  netSub.style.color = net >= 0 ? 'var(--surplus)' : 'var(--deficit)';
+
+  document.getElementById('kpi-budget').textContent = fmt(totalBudget);
+  document.getElementById('kpi-budget-sub').textContent = `₦${Math.round(CONFIG.expenseBudget/1000)}k × ${months.length} month${months.length>1?'s':''}`;
+
+  renderBar(months, midxs, txs);
+  renderDonut(txs);
+  renderTable(txs);
+  renderVariance(months, midxs);
+}
+
+function renderBar(months, midxs, txs) {
+  const incData = midxs.map(i => MONTHLY.income[i] || 0);
+  const expData = midxs.map(i => MONTHLY.expenses[i] || 0);
+  const budData = months.map(() => CONFIG.expenseBudget);
+
+  const ctx = document.getElementById('barChart').getContext('2d');
+  if (barChart) barChart.destroy();
+
+  barChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: months,
+      datasets: [
+        {
+          label: 'Income Collected',
+          data: incData,
+          backgroundColor: 'rgba(26,107,60,0.75)',
+          borderColor: '#1a6b3c',
+          borderWidth: 1,
+          borderRadius: 4,
+          borderSkipped: false,
+        },
+        {
+          label: 'Expense Expended',
+          data: expData,
+          backgroundColor: 'rgba(185,48,32,0.75)',
+          borderColor: '#b93020',
+          borderWidth: 1,
+          borderRadius: 4,
+          borderSkipped: false,
+        },
+        {
+          label: 'Expense Budget',
+          data: budData,
+          type: 'line',
+          borderColor: 'rgba(244,101,36,0.6)',
+          borderDash: [5,3],
+          borderWidth: 2,
+          pointRadius: 0,
+          fill: false,
+          tension: 0,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: {
+            color: '#9a9288',
+            font: { family: 'DM Sans', size: 11 },
+            boxWidth: 10, boxHeight: 10, padding: 16,
+          }
+        },
+        tooltip: {
+          backgroundColor: '#1a2b4a',
+          titleColor: '#fff',
+          bodyColor: 'rgba(255,255,255,0.75)',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          callbacks: { label: ctx => ` ${ctx.dataset.label}: ${fmt(ctx.raw)}` }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(0,0,0,0.04)' },
+          ticks: { color: '#9a9288', font: { family: 'DM Sans', size: 11 } },
+          border: { color: 'var(--border)' }
+        },
+        y: {
+          grid: { color: 'rgba(0,0,0,0.04)' },
+          ticks: {
+            color: '#9a9288',
+            font: { family: 'DM Sans', size: 10 },
+            callback: v => '₦' + (v/1000).toFixed(0) + 'k'
+          },
+          border: { color: 'var(--border)' }
+        }
+      }
+    }
+  });
+}
+
+function renderDonut(txs) {
+  const cats = {};
+  txs.forEach(t => { cats[t.category] = (cats[t.category] || 0) + t.amount; });
+  const labels = Object.keys(cats).sort((a,b) => cats[b] - cats[a]);
+  const data   = labels.map(l => cats[l]);
+  const total  = data.reduce((a,b) => a+b, 0);
+
+  const palette = ['#f46524','#1a2b4a','#1a6b3c','#b93020','#7a5c1e',
+                   '#2471a3','#8e44ad','#16a085','#d35400','#6c757d'];
+
+  const ctx = document.getElementById('donutChart').getContext('2d');
+  if (donutChart) donutChart.destroy();
+
+  // Update centre label defaults
+  const centreAmount = document.getElementById('donut-amount');
+  const centreLabel  = document.getElementById('donut-label');
+
+  if (!data.length) {
+    donutChart = null;
+    centreAmount.textContent = '—';
+    centreLabel.textContent  = 'No data';
+    return;
+  }
+
+  // Default centre: show total
+  centreAmount.textContent = fmt(total);
+  centreLabel.textContent  = activeCategory !== 'all' ? activeCategory : 'All Categories';
+
+  donutChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: palette.slice(0, labels.length),
+        borderColor: '#ffffff',
+        borderWidth: 2,
+        hoverOffset: 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '75%',
+      onHover: (event, elements) => {
+        if (elements.length > 0) {
+          const idx = elements[0].index;
+          centreAmount.textContent = fmt(data[idx]);
+          centreLabel.textContent  = labels[idx];
+        } else {
+          // reset to total when not hovering
+          centreAmount.textContent = fmt(total);
+          centreLabel.textContent  = activeCategory !== 'all' ? activeCategory : 'All Categories';
+        }
+      },
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            color: '#9a9288',
+            font: { family: 'DM Sans', size: 10 },
+            boxWidth: 8, boxHeight: 8, padding: 10,
+          }
+        },
+        tooltip: {
+          backgroundColor: '#1a2b4a',
+          titleColor: '#fff',
+          bodyColor: 'rgba(255,255,255,0.75)',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          callbacks: {
+            label: ctx => {
+              return ` ${fmt(ctx.raw)}  (${((ctx.raw/total)*100).toFixed(1)}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+function renderTable(txs) {
+  const body  = document.getElementById('tx-body');
+  const count = document.getElementById('tx-count');
+  count.textContent = `${txs.length} entries`;
+
+  if (!txs.length) {
+    body.innerHTML = `<tr><td colspan="4" class="empty">No transactions match this filter</td></tr>`;
+    return;
+  }
+
+  body.innerHTML = txs.map(t => `
+    <tr>
+      <td class="td-month">${t.month}</td>
+      <td class="td-desc" title="${t.desc}">${t.desc}</td>
+      <td class="td-cat"><span class="cat-badge">${t.category}</span></td>
+      <td class="td-amount">${fmt(t.amount)}</td>
+    </tr>
+  `).join('');
+}
+
+function renderVariance(months, midxs) {
+  const rows = months.map((m, i) => {
+    const actual = MONTHLY.expenses[midxs[i]] || 0;
+    const variance = CONFIG.expenseBudget - actual;
+    return { m, actual, variance };
+  });
+
+  const maxAbs = Math.max(...rows.map(r => Math.abs(r.variance)));
+
+  document.getElementById('variance-list').innerHTML = rows.map(r => {
+    const over  = r.variance < 0;
+    const pct   = maxAbs > 0 ? (Math.abs(r.variance) / maxAbs * 100) : 0;
+    const color = over ? 'var(--expense)' : 'var(--income)';
+    const sign  = over ? '−' : '+';
+    const label = over ? 'Over' : 'Under';
+    return `
+      <div class="var-item">
+        <span class="var-month">${r.m}</span>
+        <div class="var-track">
+          <div class="var-fill" style="width:${pct}%;background:${color}"></div>
+        </div>
+        <span class="var-amount" style="color:${color}">${sign}${fmt(Math.abs(r.variance))}</span>
+        <span class="var-label" style="color:${color};font-size:10px;font-weight:600">${label}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  syncPills();
+  render();
+});
+</script>
+
+<!-- ─── HEADER ─── -->
+<header class="header">
+  <div class="header-brand">
+    <div class="header-logo">B</div>
+    <div>
+      <div class="sub">Financial Dashboard · 2026</div>
+      <h1 id="estate-name"></h1>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="balance-pill">End Balance: <strong id="end-balance"></strong></span>
+    <span class="report-date" id="report-date"></span>
+  </div>
+</header>
+
+<!-- ─── FILTER BAR ─── -->
+<nav class="filter-bar">
+  <div class="filter-group">
+    <span class="filter-label">Month</span>
+    <button class="pill active" data-type="month" data-value="all" onclick="setFilter('month','all')">All</button>
+    <button class="pill" data-type="month" data-value="Jan" onclick="setFilter('month','Jan')">Jan</button>
+    <button class="pill" data-type="month" data-value="Feb" onclick="setFilter('month','Feb')">Feb</button>
+    <button class="pill" data-type="month" data-value="Mar" onclick="setFilter('month','Mar')">Mar</button>
+    <button class="pill" data-type="month" data-value="Apr" onclick="setFilter('month','Apr')">Apr</button>
+    <button class="pill" data-type="month" data-value="May" onclick="setFilter('month','May')">May</button>
+    <button class="pill" data-type="month" data-value="Jun" onclick="setFilter('month','Jun')">Jun</button> 
+  </div>
+
+  <div class="filter-group">
+    <span class="filter-label">Quarter</span>
+    <button class="pill" data-type="quarter" data-value="Q1" onclick="setFilter('quarter','Q1')">Q1</button>
+    <button class="pill" data-type="quarter" data-value="Q2" onclick="setFilter('quarter','Q2')">Q2</button>
+  </div>
+
+  <div class="filter-group">
+    <span class="filter-label">Category</span>
+    <button class="pill active" data-type="category" data-value="all" onclick="setFilter('category','all')">All</button>
+    <button class="pill" data-type="category" data-value="Security (Salaries)" onclick="setFilter('category','Security (Salaries)')">Security</button>
+    <button class="pill" data-type="category" data-value="Waste Collection" onclick="setFilter('category','Waste Collection')">Waste</button>
+    <button class="pill" data-type="category" data-value="Borehole & Water" onclick="setFilter('category','Borehole & Water')">Borehole & Water</button>
+    <button class="pill" data-type="category" data-value="Electricity (AEDC)" onclick="setFilter('category','Electricity (AEDC)')">AEDC</button>
+    <button class="pill" data-type="category" data-value="Generator & Fuel" onclick="setFilter('category','Generator & Fuel')">Generator & Fuel</button>
+    <button class="pill" data-type="category" data-value="Fumigation & Landscaping" onclick="setFilter('category','Fumigation & Landscaping')">Fumigation</button>
+    <button class="pill" data-type="category" data-value="Civil Works" onclick="setFilter('category','Civil Works')">Civil Works</button>
+    <button class="pill" data-type="category" data-value="General Works" onclick="setFilter('category','General Works')">General Works</button>
+    <button class="pill" data-type="category" data-value="Bank Charges" onclick="setFilter('category','Bank Charges')">Bank</button>
+  </div>
+</nav>
+
+<!-- ─── MAIN ─── -->
+<main class="main">
+
+  <!-- KPIs -->
+  <div class="kpi-row">
+    <div class="kpi kpi-income">
+      <div class="kpi-label">Income Collected</div>
+      <div class="kpi-value" id="kpi-income">—</div>
+      <div class="kpi-sub" id="kpi-income-sub"></div>
+    </div>
+    <div class="kpi kpi-expense">
+      <div class="kpi-label">Expense Expended</div>
+      <div class="kpi-value" id="kpi-expenses">—</div>
+      <div class="kpi-sub" id="kpi-expenses-sub"></div>
+    </div>
+    <div class="kpi kpi-net">
+      <div class="kpi-label">Net Position</div>
+      <div class="kpi-value" id="kpi-net">—</div>
+      <div class="kpi-sub" id="kpi-net-sub"></div>
+    </div>
+    <div class="kpi kpi-budget">
+      <div class="kpi-label">Expense Budget</div>
+      <div class="kpi-value" id="kpi-budget">—</div>
+      <div class="kpi-sub" id="kpi-budget-sub"></div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-row">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Monthly Income vs Expenses vs Budget</span>
+      </div>
+      <div class="card-body">
+        <div class="chart-wrap"><canvas id="barChart"></canvas></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Spending by Category</span>
+      </div>
+      <div class="card-body">
+        <div class="donut-wrap">
+          <canvas id="donutChart"></canvas>
+          <div class="donut-centre">
+            <span class="donut-centre-amount" id="donut-amount">—</span>
+            <span class="donut-centre-label" id="donut-label">Total</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom -->
+  <div class="bottom-row">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Transactions</span>
+        <span class="tx-count" id="tx-count"></span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Description</th>
+              <th>Category</th>
+              <th class="right">Amount (₦)</th>
+            </tr>
+          </thead>
+          <tbody id="tx-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Variance vs Monthly Budget</span>
+      </div>
+      <div class="variance-list" id="variance-list"></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ─── FOOTER ─── -->
+<footer class="footer">
+  <span class="footer-note">Expense budget set at ₦283,333/month. Income budget: ₦3,400,000 annual service charge. Expense Budgeted = ₦0 (full-year budget not set at Jan 2026).</span>
+  <span class="footer-brand">Betty Estate Exco · 2026</span>
+</footer>
+
+<script>
+// Populate static config values
+document.getElementById('estate-name').textContent  = CONFIG.estateName;
+document.getElementById('end-balance').textContent  = fmt(CONFIG.endBalance);
+document.getElementById('report-date').textContent  = 'As of ' + CONFIG.asOf;
+</script>
+
+</body>
+</html>
