@@ -877,16 +877,17 @@ function renderBar(months, midxs, txs) {
           borderSkipped: false,
         },
         {
-          label: 'Expense Budget',
-          data: budData,
-          type: 'line',
-          borderColor: 'rgba(244,101,36,0.6)',
-          borderDash: [5,3],
-          borderWidth: 2,
-          pointRadius: 0,
-          fill: false,
-          tension: 0,
-        }
+  label: 'Expense Budget',
+  data: budData,
+  type: 'line',
+  borderColor: '#f46524',
+  borderDash: [6,3],
+  borderWidth: 2.5,
+  pointRadius: 4,
+  pointBackgroundColor: '#f46524',
+  fill: false,
+  tension: 0,
+}
       ]
     },
     options: {
