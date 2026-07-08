@@ -618,6 +618,9 @@ const CONFIG = {
   year:          2026,
   asOf:          'June 2026',
   startBalance:  223828.66,
+  asOf:       'June 2026',
+  endBalance:  625879.78,
+   
   endBalance:    582542.33,  // update each month
   expenseBudget: 283333,     // monthly budget
   incomeBudget:  3400000,    // annual service charge target
@@ -630,22 +633,22 @@ const ALL_MONTHS    = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oc
 // Monthly figures — extend each month (0 = not yet closed)
 const MONTHLY = {
   //             Jan        Feb        Mar        Apr        May        Jun  Jul  Aug  Sep  Oct  Nov  Dec
-  income:     [670000,   300000,   180000,   100000,   420000,        520000,   0,   0,   0,   0,   0,   0],
-  expenses:   [344565,   270370,   286341,   328668,   484260,   117082,   0,   0,   0,   0,   0,   0],
+  income:     [670000,   300000,    180000,    100000,    420000,     790000,   0,   0,   0,   0,   0,   0],
+  expenses:   [344565,   270370,    286341,    328668,    484260,     343745,   0,   0,   0,   0,   0,   0],
 };
 
 // Category breakdown — extend when new months close
 // Keys must exactly match category names used in the monthly sheets
 const CATEGORIES = {
-  'Security (Salaries)':     [160000, 160000, 180000, 160000, 160000, 0, 0, 0, 0, 0, 0, 0],
-  'Waste Collection':        [ 40000,  40000,  80000,  40000,  40000, 10000, 0, 0, 0, 0, 0, 0],
-  'Borehole & Water':        [ 12000,   5000,      0,  67900, 232100, 62500, 0, 0, 0, 0, 0, 0],
-  'Electricity (AEDC)':      [ 12215,  30215,  20215,  30215,  15108, 20215, 0, 0, 0, 0, 0, 0],
-  'Generator & Fuel':        [     0,      0,      0,  16000,      0, 6200, 0, 0, 0, 0, 0, 0],
-  'Fumigation & Landscaping':[     0,      0,      0,      0,  35500, 0, 0, 0, 0, 0, 0, 0],
-  'Civil Works':             [ 94000,  28000,      0,      0,      0, 0, 0, 0, 0, 0, 0, 0],
-  'General Works':           [ 25200,   6000,   5000,  13000,      0, 17400, 0, 0, 0, 0, 0, 0],
-  'Bank Charges':            [  1150,   1155,   1126,   1553,   1552, 767, 0, 0, 0, 0, 0, 0],
+  'Security (Salaries)':      [160000, 160000, 180000, 160000, 160000, 160000, 0, 0, 0, 0, 0, 0],
+'Waste Collection':         [ 40000,  40000,  80000,  40000,  40000,  18000, 0, 0, 0, 0, 0, 0],
+'Borehole & Water':         [ 12000,   5000,      0,  67900, 232100,  62500, 0, 0, 0, 0, 0, 0],
+'Electricity (AEDC)':       [ 12215,  30215,  20215,  30215,  15108,  40430, 0, 0, 0, 0, 0, 0],
+'Generator & Fuel':         [     0,      0,      0,  16000,      0,   6200, 0, 0, 0, 0, 0, 0],
+'Fumigation & Landscaping': [     0,      0,      0,      0,  35500,  37000, 0, 0, 0, 0, 0, 0],
+'Civil Works':              [ 94000,  28000,      0,      0,      0,      0, 0, 0, 0, 0, 0, 0],
+'General Works':            [ 25200,   6000,   5000,  13000,      0,  17400, 0, 0, 0, 0, 0, 0],
+'Bank Charges':             [  1150,   1155,   1126,   1553,   1552,   2215, 0, 0, 0, 0, 0, 0],
 };
 
 // Full transaction log — add new transactions each month
@@ -718,19 +721,29 @@ const TRANSACTIONS = [
   {month:'May',amount:40000,  desc:'Waste collection — May 2026',           category:'Waste Collection'},
   {month:'May',amount:1552,   desc:'Bank charges + stamp duty + SMS',       category:'Bank Charges'},
 // ── JUNE ──
-  {month:'Jun',amount:13000,    desc:'Balance: taking the tank up/down',       category:'Borehole & Water'},
-  {month:'Jun',amount:9400,     desc:'Gravel stone for ground work',           category:'Borehole & Water'},
-  {month:'Jun',amount:5200,     desc:'Plumbing materials',                     category:'Borehole & Water'},
-  {month:'Jun',amount:23500,    desc:'2 bags of cement for Blk A & B',         category:'Borehole & Water'},
-  {month:'Jun',amount:4400,     desc:'Plumbing work material',                 category:'Borehole & Water'},
-  {month:'Jun',amount:7000,     desc:'Labour for Blk A & B',                   category:'Borehole & Water'},
-  {month:'Jun',amount:15400,    desc:'AKT bulb for street lights (7pcs)',      category:'General Works'},
-  {month:'Jun',amount:6200,     desc:'Oil and plug for generator service',     category:'Generator & Fuel'},
-  {month:'Jun',amount:10107.5,  desc:'Power unit (AEDC) — Blk A',              category:'Electricity (AEDC)'},
-  {month:'Jun',amount:10107.5,  desc:'Power unit (AEDC) — Blk B',              category:'Electricity (AEDC)'},
-  {month:'Jun',amount:2000,     desc:'Ladder for street light installation',   category:'General Works'},
-  {month:'Jun',amount:10000,    desc:'Waste collection for June 2026',         category:'Waste Collection'},
-  {month:'Jun',amount:767,      desc:'Bank charges + stamp duty + SMS',        category:'Bank Charges'},
+  // ── JUNE ──
+  {month:'Jun',amount:13000,   desc:'Balance: taking the tank up/down',      category:'Borehole & Water'},
+  {month:'Jun',amount:9400,    desc:'Gravel stone for ground work',           category:'Borehole & Water'},
+  {month:'Jun',amount:5200,    desc:'Plumbing materials',                     category:'Borehole & Water'},
+  {month:'Jun',amount:23500,   desc:'2 bags of cement for Blk A & B',        category:'Borehole & Water'},
+  {month:'Jun',amount:4400,    desc:'Plumbing work material',                 category:'Borehole & Water'},
+  {month:'Jun',amount:7000,    desc:'Labour for Blk A & B',                  category:'Borehole & Water'},
+  {month:'Jun',amount:15400,   desc:'AKT bulb for street lights (7pcs)',      category:'General Works'},
+  {month:'Jun',amount:6200,    desc:'Oil and plug for generator service',     category:'Generator & Fuel'},
+  {month:'Jun',amount:10107.5, desc:'Power unit (AEDC) — Blk A',             category:'Electricity (AEDC)'},
+  {month:'Jun',amount:10107.5, desc:'Power unit (AEDC) — Blk B',             category:'Electricity (AEDC)'},
+  {month:'Jun',amount:2000,    desc:'Ladder for street light installation',   category:'General Works'},
+  {month:'Jun',amount:10000,   desc:'Waste collection — June 2026 (part 1)', category:'Waste Collection'},
+  {month:'Jun',amount:13000,   desc:'Chemical for grass + transportation',    category:'Fumigation & Landscaping'},
+  {month:'Jun',amount:7000,    desc:'Spraying of grasses',                   category:'Fumigation & Landscaping'},
+  {month:'Jun',amount:5000,    desc:'Fuel and oil for cutting grasses',      category:'Fumigation & Landscaping'},
+  {month:'Jun',amount:12000,   desc:'Cutting of compound grasses',           category:'Fumigation & Landscaping'},
+  {month:'Jun',amount:80000,   desc:'Salaries IOU (40k × 4 persons)',        category:'Security (Salaries)'},
+  {month:'Jun',amount:8000,    desc:'Waste collection — June 2026 (part 2)', category:'Waste Collection'},
+  {month:'Jun',amount:80000,   desc:'Salaries balance (20k × 4 persons)',    category:'Security (Salaries)'},
+  {month:'Jun',amount:10107.5, desc:'Power unit (AEDC) — Blk A (30 Jun)',   category:'Electricity (AEDC)'},
+  {month:'Jun',amount:10107.5, desc:'Power unit (AEDC) — Blk B (30 Jun)',   category:'Electricity (AEDC)'},
+  {month:'Jun',amount:2215,    desc:'Bank charges + stamp duty + SMS',       category:'Bank Charges'},
 ];
 
 // ─────────────────────────────────────────
